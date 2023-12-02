@@ -1,45 +1,30 @@
-import { setLocalStorage, getLocalStorage } from "./utils.js";
-import ProductData from "./ProductData.js";
-import { getParams } from './utils.mjs';
+// product.js
+import ProductData from "./ProductData.mjs";
 import ProductDetails from "./ProductDetails.mjs";
+import Cart from "./Cart.mjs";
+import {setLocalStorage, getParam } from "./utils.mjs";
 
+// This script should be included in the product detail page
+
+const productId = getParam("product");
 const dataSource = new ProductData("tents");
-const productId = getParams('product');
+const cart = new Cart(); // Creates an instance of the Cart class
 
-const product = new ProductDetails(productId, dataSource);
-product.init();
+const productDetails = new ProductDetails(productId, dataSource);
+productDetails.init();
 
-console.log(dataSource.findProductById(productId));
-
-function addProductToCart(product) {
-  // Retrieve existing cart items from local storage
-  let cartItems = getLocalStorage("so-cart");
- 
-  // If not array, initialize as empty array
-  if (!Array.isArray(cartItems)) {
-     cartItems = [];
+document.addEventListener('DOMContentLoaded', () => {
+  const addToCartButton = document.getElementById("addToCart");
+  if (addToCartButton) {
+    addToCartButton.addEventListener("click", async () => {
+      try {
+        const product = await dataSource.findProductById(productId);
+        cart.addProduct(product); // Adds the product to the cart
+        alert('Product added to cart!');
+      } catch (error) {
+        console.error("Could not add product to cart:", error);
+        alert('Failed to add product to cart.');
+      }
+    });
   }
- 
-  // Add new product to cartItems array
-  cartItems.push(product);
- 
-  // Save updated cartItems array back to local storage
-  setLocalStorage("so-cart", cartItems);
- }
-
-// add to cart button event handler
-async function addToCartHandler(e) {
-  try {
-    const product = await dataSource.findProductById(e.target.dataset.id);
-    addProductToCart(product);
-  } catch (error) {
-    // console.error(error);
-  }
-}
-
-// add listener to Add to Cart button
-document
-  .getElementById("addToCart")
-  .addEventListener("click", addToCartHandler);
-
-
+});
