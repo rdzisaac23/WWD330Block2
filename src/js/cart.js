@@ -2,22 +2,16 @@ import { getLocalStorage } from "./utils.mjs";
 
 // Function to render the contents of the cart
 function renderCartContents() {
-  try {
-    const cartItems = getLocalStorage("so-cart") || [];
-    const htmlItems = cartItems.map(item => cartItemTemplate(item));
+  const cartItems = getLocalStorage("so-cart");
+  if (Array.isArray(cartItems)) {
+    const htmlItems = cartItems.map((item) => cartItemTemplate(item));
     document.querySelector(".product-list").innerHTML = htmlItems.join("");
-
-    // Update the cart total if there are items in the cart
-    if (cartItems.length > 0) {
-      updateCartTotal(cartItems);
-    } else {
-      // Hide the cart total element if the cart is empty
-      document.querySelector(".cart-footer").classList.add("hide");
-    }
-  } catch (error) {
-    console.error("Error rendering cart contents:", error);
+  } else {
+    console.error('Cart items are not in an array format');
+    // Handle the case when cartItems is not an array
   }
 }
+
 
 // Template for individual cart items
 function cartItemTemplate(item) {
